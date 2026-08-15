@@ -1,0 +1,109 @@
+---
+title: "Authenticating With the WishWe API"
+sidebarTitle: "Authentication"
+description: "WishWe uses JWT bearer tokens for API authentication. Learn how to obtain tokens via email or Google OAuth, refresh them, and handle auth errors."
+---
+
+WishWe's API authenticates requests with JWTs. Tokens are issued after a successful login or registration and must be included in every authenticated request as a bearer token.
+
+## Base URL
+
+All API requests go to:
+
+```
+https://wishwe.online
+```
+
+## How Authentication Works
+
+After you complete a login or registration flow, the server sets two `HttpOnly` cookies on the response:
+
+- **`access_token`** — a short-lived JWT you include on every authenticated request
+- **`refresh_token`** — a longer-lived token used only to obtain a new access token
+
+For each authenticated request, read the `access_token` value and pass it in the `Authorization` header:
+
+```http
+Authorization: Bearer <access_token>
+```
+
+When the access token expires, call the refresh endpoint to get a new one without requiring the user to log in again.
+
+<Note>
+  For browser-based apps, the server sets `access_token` and `refresh_token` cookies automatically and the browser sends them with each request. For native clients (such as mobile apps), read the tokens directly from the `Set-Cookie` headers in the login or registration response and store them securely — for example, in an encrypted store like `expo-secure-store`. Then attach the access token manually via the `Authorization` header on every authenticated call.
+</Note>
+
+<Tip>
+  The `Authorization: Bearer` header takes precedence over the cookie on the backend. If you send both, the bearer token wins.
+</Tip>
+
+### Token Refresh
+
+Access tokens are short-lived. When a request returns `401`, use the refresh endpoint to swap your refresh token for a new access token. The refresh endpoint is the **one exception** to the bearer token pattern — it reads the refresh token from a cookie header instead:
+
+```http
+Cookie: refresh_token=<refresh_token>
+```
+
+Send this header directly in your `POST /api/user/auth/token/refresh/` request.
+
+---
+
+## Email Sign-Up Flow
+
+Use this three-step flow to create a new account with an email address and password.
+
+**Step 1 — Start the flow**
+
+`POST /api/user/auth/email-start/` with the user's email address. If the email is new, the server sends a 6-digit OTP. The response tells you whether this email belongs to an existing account (`"flow": "login"`) or a new one (`"flow": "register"`).
+
+**Step 2 — Verify the code**
+
+`POST /api/user/auth/verify-code/` with the email and the 6-digit code. On success, the server returns a `verification_token` (a UUID) that authorises the password-setting step.
+
+**Step 3 — Set a password**
+
+`POST /api/user/auth/set-password/` with the `verification_token` and the chosen password. On success, the server sets `access_token` and `refresh_token` cookies and returns the user object. The account is now active and the user is signed in.
+
+---
+
+## Email Login Flow
+
+Use this single-step flow for existing accounts.
+
+`POST /api/user/auth/token/` with the user's email and password. On success, the server sets the `access_token` and `refresh_token` cookies.
+
+---
+
+## Google OAuth Flow
+
+`POST /api/user/auth/google/` with the Google OAuth `token` (the ID token from Google). The server verifies it, creates or links the account, and sets `access_token` and `refresh_token` cookies.
+
+---
+
+## Token Refresh
+
+When the access token expires, `POST /api/user/auth/token/refresh/` with the refresh token in a `Cookie` header:
+
+```http
+Cookie: refresh_token=<refresh_token>
+```
+
+On success, the server sets a new `access_token` cookie. Your client should read the new value from the `Set-Cookie` header and replace the stored token.
+
+---
+
+## Logout
+
+`POST /api/user/auth/logout/` (authenticated) clears both the `access_token` and `refresh_token` cookies from the server's response. Always also clear any locally stored tokens on your client so the user is fully signed out.
+
+---
+
+## Auth Errors
+
+| Status | Meaning                                      |
+| ------ | -------------------------------------------- |
+| `401`  | No token provided, or the token has expired  |
+| `403`  | Valid token, but insufficient permissions    |
+
+When you receive a `401`, attempt a token refresh before asking the user to log in again. If the refresh also fails (for example, the refresh token has expired), clear the local session and redirect to the login screen.

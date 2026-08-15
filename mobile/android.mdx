@@ -1,0 +1,118 @@
+---
+title: "Run WishWe on Android"
+sidebarTitle: "Android"
+description: "Set up and launch the WishWe mobile app on an Android Emulator using Expo. Covers Android Studio setup, backend configuration, and launch steps."
+---
+
+This page walks you through running the WishWe mobile app on an Android Emulator. You'll configure Android Studio with a virtual device, start the Django backend locally, point the mobile app at it, and launch through Expo. Unlike iOS, Android development works on macOS, Windows, and Linux.
+
+## Prerequisites
+
+Before you begin, make sure you have the following installed and ready:
+
+- **Android Studio** with an Android Virtual Device (AVD) configured. Follow Expo's [Android emulator setup guide](https://docs.expo.dev/workflow/android-studio-emulator/) if you haven't done this yet.
+- **Android SDK tools** — installed automatically with Android Studio.
+- **Node.js LTS** (includes npm) — download from [nodejs.org](https://nodejs.org).
+- **Python 3.12 or newer** — download from [python.org](https://www.python.org).
+- **PostgreSQL database** — a non-production database you can connect to locally. The repository's Docker Compose file is for production deployment and does not start a local database.
+
+## Start the Backend
+
+The mobile app requires a running Django API. Open a terminal, navigate to the repository root, and follow these steps:
+
+<Steps>
+  <Step title="Copy and edit the environment file">
+    ```bash
+    cd backend
+    cp .env.sample .env
+    ```
+
+    Open `backend/.env` and set the following values for your local database:
+
+    ```bash
+    SECRET_KEY=a-long-random-local-secret
+    DB_HOST=your-database-host
+    DB_NAME=your-database-name
+    DB_USER=your-database-user
+    DB_PASSWORD=your-database-password
+    DB_PORT=5432
+    DJANGO_SETTINGS_MODULE=wishwe_api.settings
+    ```
+  </Step>
+
+  <Step title="Create a virtual environment and install dependencies">
+    ```bash
+    python3 -m venv .venv
+    source .venv/bin/activate
+    pip install -r requirements.txt
+    ```
+
+    On Windows, run these commands in Git Bash and use `source .venv/Scripts/activate` instead.
+  </Step>
+
+  <Step title="Apply database migrations">
+    ```bash
+    python manage.py migrate
+    ```
+
+    Only run this against a development database you are explicitly allowed to modify. Never migrate a shared or production database without authorization.
+  </Step>
+
+  <Step title="Start the development server">
+    ```bash
+    python manage.py runserver 0.0.0.0:8000 --noreload
+    ```
+
+    Leave this terminal running. The backend must stay up while you use the app. You can verify it's healthy by checking `http://localhost:8000/api/health/` — it should return `{"status":"ok"}`.
+  </Step>
+</Steps>
+
+## Configure the Mobile App
+
+Open a second terminal, then install dependencies and set the API URL:
+
+<Steps>
+  <Step title="Install npm dependencies">
+    ```bash
+    cd mobile
+    npm ci
+    ```
+  </Step>
+
+  <Step title="Set the API URL">
+    ```bash
+    cp .env.example .env
+    ```
+
+    Open `mobile/.env` and set:
+
+    ```bash
+    # Set EXPO_PUBLIC_API_URL=http://10.0.2.2:8000
+    EXPO_PUBLIC_API_URL=http://10.0.2.2:8000
+    ```
+
+    <Note>
+      Android Emulator uses `10.0.2.2` to reach your host machine's localhost. Do NOT use `localhost` here — inside the emulator, `localhost` points to the emulator itself, not your Django server.
+    </Note>
+  </Step>
+</Steps>
+
+## Launch on Android Emulator
+
+<Steps>
+  <Step title="Start your AVD">
+    Open Android Studio and launch your virtual device from **Device Manager**. Wait for the emulator to finish booting before continuing.
+  </Step>
+
+  <Step title="Start Expo">
+    ```bash
+    npx expo start --android
+    ```
+
+    Expo starts the Metro bundler and automatically opens the app in the running emulator.
+  </Step>
+</Steps>
+
+<Tip>
+  If Metro is already running, press `a` in the Metro terminal to open the Android Emulator without restarting the bundler.
+</Tip>

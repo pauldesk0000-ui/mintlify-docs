@@ -1,0 +1,39 @@
+---
+title: "WishWe Mobile App for iOS and Android"
+sidebarTitle: "Overview"
+description: "WishWe is available as a native mobile app for iOS and Android, built with React Native and Expo. Get all features on the go."
+---
+
+WishWe mobile brings the full web experience to iOS and Android. Built with React Native and Expo, the app shares the same backend and API as the web app at [wishwe.online](https://wishwe.online) — so everything you do on one platform is instantly reflected on the other.
+
+## Features
+
+The mobile app gives you access to every feature available on the web:
+
+- **Wishes** — post open-ended ideas with a loose timeframe and let friends mark themselves interested.
+- **Plans** — create concrete events with a date, time, and participant limit; friends join until capacity is reached.
+- **Friends** — send and accept friend requests, search for users, and share your personal invite link.
+- **Notifications** — stay on top of friend requests, joins, interest reactions, event updates, and scheduled reminders.
+- **Profile** — manage your username, bio, city, avatar, and privacy settings.
+- **Sharing** — share deep links to any wish or plan with anyone, on or off the platform.
+
+## Authentication
+
+You sign in with your email address and password, or continue with Google OAuth. The app stores your session securely using [expo-secure-store](https://docs.expo.dev/versions/latest/sdk/securestore/) — tokens are never held in JavaScript memory. Sessions refresh transparently in the background, so you stay signed in without interruption.
+
+## Getting the App
+
+The WishWe mobile app is built with [Expo](https://expo.dev) and runs on both iOS and Android. Follow the platform-specific guide to set up your environment, configure the backend connection, and launch the app.
+
+<CardGroup cols={2}>
+  <Card title="iOS" icon="apple" href="/mobile/ios">
+    Run WishWe on an iOS Simulator or physical iPhone. Requires macOS and Xcode.
+  </Card>
+  <Card title="Android" icon="android" href="/mobile/android">
+    Run WishWe on an Android Emulator. Works on macOS, Windows, and Linux.
+  </Card>
+</CardGroup>
+
+<Note>
+  The mobile app connects to the same account as the web app at wishwe.online — use the same credentials on both.
+</Note>

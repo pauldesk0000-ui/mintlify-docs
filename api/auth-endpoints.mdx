@@ -1,0 +1,481 @@
+---
+title: "WishWe Auth API Endpoints Reference"
+sidebarTitle: "Auth Endpoints"
+description: "Full reference for every WishWe auth endpoint: email start, verify code, set password, login, token refresh, logout, Google OAuth, and password reset."
+---
+
+This page documents every authentication endpoint in the WishWe API. All endpoints are prefixed with the base URL `https://wishwe.online`.
+
+---
+
+## POST /api/user/auth/email-start/
+
+Starts the email authentication flow. Pass any email address to find out whether it belongs to an existing account. If the email is new, the server automatically sends a 6-digit OTP to that address.
+
+<Note>
+  This endpoint is rate-limited to 5 requests per minute per IP address.
+</Note>
+
+### Request body
+
+<ParamField body="email" type="string" required>
+  The user's email address.
+</ParamField>
+
+### Response
+
+<ResponseField name="flow" type="string">
+  `"login"` if the email belongs to an existing account; `"register"` if it is new. Use this value to decide which screen to show the user next.
+</ResponseField>
+
+**Example request**
+
+```json
+POST /api/user/auth/email-start/
+Content-Type: application/json
+
+{
+  "email": "maya@example.com"
+}
+```
+
+**Example response — new account**
+
+```json
+HTTP/1.1 200 OK
+
+{
+  "flow": "register"
+}
+```
+
+**Example response — existing account**
+
+```json
+HTTP/1.1 200 OK
+
+{
+  "flow": "login"
+}
+```
+
+---
+
+## POST /api/user/auth/verify-code/
+
+Exchanges the 6-digit OTP for a `verification_token`. You need this token to complete the `set-password` step and create the account.
+
+### Request body
+
+<ParamField body="email" type="string" required>
+  The email address the OTP was sent to.
+</ParamField>
+
+<ParamField body="code" type="string" required>
+  The 6-digit OTP the user received by email.
+</ParamField>
+
+### Response
+
+<ResponseField name="verification_token" type="string">
+  A UUID that authorises the `set-password` step. Store it temporarily — you need to pass it to `/api/user/auth/set-password/` to finish registration.
+</ResponseField>
+
+**Example request**
+
+```json
+POST /api/user/auth/verify-code/
+Content-Type: application/json
+
+{
+  "email": "maya@example.com",
+  "code": "482931"
+}
+```
+
+**Example response**
+
+```json
+HTTP/1.1 200 OK
+
+{
+  "verification_token": "a3f1c2d4-9e87-4b56-83af-1234567890ab"
+}
+```
+
+---
+
+## POST /api/user/auth/resend-code/
+
+Resends the 6-digit OTP to the given email address. Call this if the user did not receive the original code or if the code has expired.
+
+### Request body
+
+<ParamField body="email" type="string" required>
+  The email address to resend the OTP to.
+</ParamField>
+
+### Response
+
+Returns `200 OK` with `{ "message": "Code resent" }` on success. No additional fields.
+
+**Example request**
+
+```json
+POST /api/user/auth/resend-code/
+Content-Type: application/json
+
+{
+  "email": "maya@example.com"
+}
+```
+
+**Example response**
+
+```json
+HTTP/1.1 200 OK
+
+{
+  "message": "Code resent"
+}
+```
+
+---
+
+## POST /api/user/auth/set-password/
+
+Completes the registration flow. Pass the `verification_token` from `verify-code` and the user's chosen password. On success, the server creates the account, sets `access_token` and `refresh_token` cookies, and returns the new user object.
+
+### Request body
+
+<ParamField body="token" type="string" required>
+  The `verification_token` UUID returned by `/api/user/auth/verify-code/`.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  The password the user wants to set for their new account.
+</ParamField>
+
+### Response
+
+Sets `Set-Cookie: access_token=<jwt>` and `Set-Cookie: refresh_token=<jwt>` on the response. The body contains the newly created user object.
+
+<ResponseField name="id" type="integer">
+  The user's unique ID.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  The user's email address.
+</ResponseField>
+
+<ResponseField name="is_verified" type="boolean">
+  `true` once the email has been verified via OTP.
+</ResponseField>
+
+**Example request**
+
+```json
+POST /api/user/auth/set-password/
+Content-Type: application/json
+
+{
+  "token": "a3f1c2d4-9e87-4b56-83af-1234567890ab",
+  "password": "S3cur3P@ssw0rd!"
+}
+```
+
+**Example response**
+
+```json
+HTTP/1.1 200 OK
+Set-Cookie: access_token=eyJhbGci...; HttpOnly; SameSite=Lax; Secure
+Set-Cookie: refresh_token=eyJhbGci...; HttpOnly; SameSite=Lax; Secure
+
+{
+  "id": 42,
+  "email": "maya@example.com",
+  "is_verified": true
+}
+```
+
+<Note>
+  For native clients, read `access_token` and `refresh_token` from the `Set-Cookie` headers and store them securely. Do not rely on an automatic cookie jar in mobile environments.
+</Note>
+
+---
+
+## POST /api/user/auth/token/
+
+Authenticates an existing user with email and password. On success, the server sets `access_token` and `refresh_token` cookies.
+
+<Note>
+  This endpoint is rate-limited to 5 requests per minute per IP address.
+</Note>
+
+### Request body
+
+<ParamField body="email" type="string" required>
+  The user's email address.
+</ParamField>
+
+<ParamField body="password" type="string" required>
+  The user's password.
+</ParamField>
+
+### Response
+
+Sets `Set-Cookie: access_token=<jwt>` and `Set-Cookie: refresh_token=<jwt>` on the response.
+
+**Example request**
+
+```json
+POST /api/user/auth/token/
+Content-Type: application/json
+
+{
+  "email": "maya@example.com",
+  "password": "S3cur3P@ssw0rd!"
+}
+```
+
+**Example response**
+
+```json
+HTTP/1.1 200 OK
+Set-Cookie: access_token=eyJhbGci...; HttpOnly; SameSite=Lax; Secure
+Set-Cookie: refresh_token=eyJhbGci...; HttpOnly; SameSite=Lax; Secure
+```
+
+---
+
+## POST /api/user/auth/token/refresh/
+
+Exchanges a valid refresh token for a new access token. Unlike every other endpoint, this one reads the refresh token from a `Cookie` request header rather than from a JSON body.
+
+### Request headers
+
+<ParamField body="Cookie" type="string" required>
+  Must contain `refresh_token=<token>`. Example: `Cookie: refresh_token=eyJhbGci...`
+</ParamField>
+
+### Response
+
+Sets a new `Set-Cookie: access_token=<jwt>` cookie. For native clients, read the new value from the `Set-Cookie` header and replace your stored access token.
+
+<ResponseField name="message" type="string">
+  `"Token refreshed"` on success.
+</ResponseField>
+
+**Example request**
+
+```http
+POST /api/user/auth/token/refresh/ HTTP/1.1
+Cookie: refresh_token=eyJhbGci...
+```
+
+**Example response**
+
+```json
+HTTP/1.1 200 OK
+Set-Cookie: access_token=eyJhbGci...; HttpOnly; SameSite=Lax; Secure
+
+{
+  "message": "Token refreshed"
+}
+```
+
+<Tip>
+  If the refresh token is expired or invalid, the server returns `401`. Clear the local session and send the user back to the login screen.
+</Tip>
+
+---
+
+## POST /api/user/auth/logout/
+
+Signs the user out. Requires a valid access token. The server deletes both `access_token` and `refresh_token` cookies from the response. Always clear any locally stored tokens on your client as well.
+
+### Request headers
+
+<ParamField body="Authorization" type="string" required>
+  `Bearer <access_token>`
+</ParamField>
+
+### Response
+
+Returns `200 OK`. No meaningful body content.
+
+<ResponseField name="message" type="string">
+  `"Logged out"` on success.
+</ResponseField>
+
+**Example request**
+
+```http
+POST /api/user/auth/logout/ HTTP/1.1
+Authorization: Bearer eyJhbGci...
+```
+
+**Example response**
+
+```json
+HTTP/1.1 200 OK
+
+{
+  "message": "Logged out"
+}
+```
+
+---
+
+## POST /api/user/auth/google/
+
+Authenticates or registers a user via Google OAuth. Pass the Google ID token you received from the Google sign-in SDK. The server verifies it with Google, then creates or links the account and issues WishWe session cookies.
+
+### Request body
+
+<ParamField body="token" type="string" required>
+  The Google ID token (a JWT) from the Google OAuth flow on the client side.
+</ParamField>
+
+### Response
+
+Sets `Set-Cookie: access_token=<jwt>` and `Set-Cookie: refresh_token=<jwt>` on the response, plus the user object in the body. If the Google account is new to WishWe, a profile is created automatically with the name and avatar pulled from the Google account.
+
+<ResponseField name="id" type="integer">
+  The user's unique ID.
+</ResponseField>
+
+<ResponseField name="email" type="string">
+  The verified email address from the Google account.
+</ResponseField>
+
+<ResponseField name="is_verified" type="boolean">
+  Always `true` for Google-authenticated accounts (Google pre-verifies the email).
+</ResponseField>
+
+**Example request**
+
+```json
+POST /api/user/auth/google/
+Content-Type: application/json
+
+{
+  "token": "eyJhbGciOiJSUzI1NiIsImtpZCI6Ij..."
+}
+```
+
+**Example response**
+
+```json
+HTTP/1.1 200 OK
+Set-Cookie: access_token=eyJhbGci...; HttpOnly; SameSite=Lax; Secure
+Set-Cookie: refresh_token=eyJhbGci...; HttpOnly; SameSite=Lax; Secure
+
+{
+  "id": 17,
+  "email": "maya@gmail.com",
+  "is_verified": true
+}
+```
+
+---
+
+## POST /api/user/auth/reset-password/
+
+Starts the password reset flow for an existing account. If the email matches a registered user, the server sends a 6-digit OTP to that address. To avoid leaking account existence, the endpoint always returns `200` regardless of whether the email is found.
+
+### Request body
+
+<ParamField body="email" type="string" required>
+  The email address associated with the account to reset.
+</ParamField>
+
+### Response
+
+Returns `200 OK` on success. No sensitive data is returned.
+
+<ResponseField name="message" type="string">
+  `"Code sent"` on success.
+</ResponseField>
+
+**Example request**
+
+```json
+POST /api/user/auth/reset-password/
+Content-Type: application/json
+
+{
+  "email": "maya@example.com"
+}
+```
+
+**Example response**
+
+```json
+HTTP/1.1 200 OK
+
+{
+  "message": "Code sent"
+}
+```
+
+---
+
+## POST /api/user/auth/set-new-password/
+
+Completes the password reset flow. Pass the verification token from the OTP step along with the new password (repeated for confirmation). On success, the password is updated and the user can log in with the new credentials.
+
+### Request body
+
+<ParamField body="token" type="string" required>
+  The `verification_token` UUID obtained after verifying the OTP sent to the user's email during the reset flow.
+</ParamField>
+
+<ParamField body="new_password" type="string" required>
+  The new password the user wants to set.
+</ParamField>
+
+<ParamField body="re_new_password" type="string" required>
+  Confirmation of the new password. Must exactly match `new_password`.
+</ParamField>
+
+### Response
+
+Returns `200 OK` on success.
+
+<ResponseField name="message" type="string">
+  `"Password updated"` on success.
+</ResponseField>
+
+**Example request**
+
+```json
+POST /api/user/auth/set-new-password/
+Content-Type: application/json
+
+{
+  "token": "a3f1c2d4-9e87-4b56-83af-1234567890ab",
+  "new_password": "N3wS3cur3P@ss!",
+  "re_new_password": "N3wS3cur3P@ss!"
+}
+```
+
+**Example response**
+
+```json
+HTTP/1.1 200 OK
+
+{
+  "message": "Password updated"
+}
+```
+
+**Example error — mismatched passwords**
+
+```json
+HTTP/1.1 400 Bad Request
+
+{
+  "error": "Passwords do not match"
+}
+```

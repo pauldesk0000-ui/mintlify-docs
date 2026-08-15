@@ -1,0 +1,419 @@
+---
+title: "WishWe Event Actions: Join, Leave, Convert, and Archive"
+sidebarTitle: "Event Actions"
+description: "API reference for WishWe event actions: joining a plan, marking interest in a wish, leaving, converting a wish to a plan, copying, and archiving."
+---
+
+Event action endpoints let you interact with existing events — joining plans, expressing interest in wishes, leaving events, and managing your own events as a creator. All action endpoints are scoped to a specific event by its `{id}` and require authentication unless otherwise noted.
+
+---
+
+## Join a Plan
+
+Join an active plan as a participant.
+
+```
+POST /api/event/events/{id}/join_plan/
+```
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The unique ID of the plan to join.
+</ParamField>
+
+### Response
+
+Returns `200 OK` with the updated event object.
+
+- Returns `400 Bad Request` if the plan is full (`status: closed`), already expired, or you have already joined.
+- Returns `400 Bad Request` if called on a wish.
+
+```json
+{
+  "id": 55,
+  "event_type": "plan",
+  "status": "active",
+  "participants_count": 4,
+  "available_spots": 6,
+  "is_full": false,
+  "user_participation_status": "joined"
+}
+```
+
+<Note>
+  When the plan reaches `max_participants` after your join, the status automatically changes to `closed`.
+</Note>
+
+---
+
+## Mark Interest in a Wish
+
+Register your interest in a wish event.
+
+```
+POST /api/event/events/{id}/interested_in_wish/
+```
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The unique ID of the wish.
+</ParamField>
+
+### Response
+
+Returns `200 OK` with the updated event object.
+
+- Returns `400 Bad Request` if called on a plan, if the event is not `active`, or if you have already marked interest.
+
+```json
+{
+  "id": 42,
+  "event_type": "wish",
+  "status": "active",
+  "interested_count": 5,
+  "user_participation_status": "interested"
+}
+```
+
+---
+
+## Leave an Event
+
+Remove yourself from a plan or withdraw your interest from a wish.
+
+```
+POST /api/event/events/{id}/leave_event/
+```
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The unique ID of the event to leave.
+</ParamField>
+
+### Response
+
+Returns `200 OK` with the updated event object.
+
+- Returns `400 Bad Request` if you are not currently participating or have already left.
+
+```json
+{
+  "id": 55,
+  "event_type": "plan",
+  "status": "active",
+  "participants_count": 3,
+  "available_spots": 7,
+  "user_participation_status": null
+}
+```
+
+<Note>
+  If you leave a plan that was `closed` due to being full and your departure brings it back under `max_participants`, the status automatically reverts to `active`.
+</Note>
+
+---
+
+## Convert a Wish to a Plan
+
+Promote a wish into a concrete plan by adding a date, time, and participant cap. Only the event creator can call this endpoint.
+
+```
+POST /api/event/events/{id}/convert_to_plan/
+```
+
+<Note>
+  Conversion is **irreversible**. Once a wish becomes a plan, it cannot be converted back. All users who were interested in the wish are notified of the new plan.
+</Note>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The unique ID of the wish to convert.
+</ParamField>
+
+### Request Body
+
+<ParamField body="event_date" type="string" required>
+  The date of the plan in `YYYY-MM-DD` format.
+</ParamField>
+
+<ParamField body="event_time" type="string" required>
+  The time of the plan in `HH:MM` format.
+</ParamField>
+
+<ParamField body="max_participants" type="integer" required>
+  Maximum number of participants. Must be at least `2` and greater than or equal to `min_participants`.
+</ParamField>
+
+<ParamField body="min_participants" type="integer">
+  Minimum number of participants. Optional; defaults to the value already set on the wish.
+</ParamField>
+
+<ParamField body="external_link" type="string">
+  Optional URL with additional information about the plan.
+</ParamField>
+
+### Response
+
+Returns `200 OK` with the updated event object. The `event_type` is now `plan`, and `expires_at` is set to 5 minutes after the scheduled event datetime.
+
+```json
+{
+  "id": 42,
+  "event_type": "plan",
+  "status": "active",
+  "event_date": "2025-09-14",
+  "event_time": "18:30",
+  "min_participants": 2,
+  "max_participants": 12,
+  "participants_count": 1,
+  "interested_count": 3,
+  "available_spots": 11,
+  "expires_at": "2025-09-14T18:35:00Z",
+  "user_participation_status": "joined"
+}
+```
+
+---
+
+## Copy a Wish
+
+Create a personal copy of someone else's wish. The copy is attributed to you as the creator and you are automatically added as an interested participant.
+
+```
+POST /api/event/events/{id}/copy_wish/
+```
+
+<Note>
+  You cannot copy your own wishes — only wishes created by other users.
+</Note>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The unique ID of the wish to copy.
+</ParamField>
+
+### Response
+
+Returns `201 Created` with the new event object. The copied wish inherits the original's `title`, `description`, `cover_image`, `location`, `category`, `timeframe_text`, and `external_link`.
+
+```json
+{
+  "id": 78,
+  "event_type": "wish",
+  "status": "active",
+  "title": "Hot Air Balloon Ride",
+  "description": "Always wanted to try this with friends!",
+  "location": "Napa Valley, CA",
+  "timeframe_text": "This fall",
+  "creator": "alex_j",
+  "interested_count": 1,
+  "user_participation_status": "interested",
+  "created_at": "2025-07-16T08:00:00Z"
+}
+```
+
+---
+
+## Archive a Plan
+
+Mark a plan as completed. This is the creator's way of officially closing out a plan after it has taken place.
+
+```
+POST /api/event/events/{id}/archive_plan/
+```
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The unique ID of the plan to archive.
+</ParamField>
+
+### Response
+
+Returns `200 OK` with a success message.
+
+- Returns `403 Forbidden` if called on a wish.
+
+```json
+{
+  "detail": "You successfully archived your plan Weekend Hike at Runyon Canyon"
+}
+```
+
+<Warning>
+  Archiving sets the plan's `status` to `completed`. Completed plans cannot be edited or joined, and wishes can never be archived.
+</Warning>
+
+---
+
+## Update a Wish
+
+Partially update a wish you created. Only the event creator can call this endpoint.
+
+```
+PATCH /api/event/events/{id}/update_wish/
+```
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The unique ID of the wish to update.
+</ParamField>
+
+### Request Body
+
+Send any combination of wish fields you want to update. All fields are optional in a partial update.
+
+<ParamField body="title" type="string">
+  Updated event title. Maximum 50 characters.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Updated description. Maximum 200 characters.
+</ParamField>
+
+<ParamField body="location" type="string">
+  Updated location.
+</ParamField>
+
+<ParamField body="category" type="integer">
+  Updated category ID.
+</ParamField>
+
+<ParamField body="timeframe_text" type="string">
+  Updated timeframe description. Cannot be cleared — wishes always require a `timeframe_text` value.
+</ParamField>
+
+<ParamField body="event_visibility" type="string">
+  Updated visibility. One of `friends-only` or `f-o-f`.
+</ParamField>
+
+<ParamField body="min_participants" type="integer">
+  Updated minimum participant count.
+</ParamField>
+
+<ParamField body="cover_image" type="file">
+  Updated cover image. Send as `multipart/form-data`.
+</ParamField>
+
+### Response
+
+Returns `200 OK` with the updated event object.
+
+- Returns `400 Bad Request` if the wish is in `completed` status.
+
+---
+
+## Update a Plan
+
+Partially update a plan you created. Only the event creator can call this endpoint. If you change the date, time, location, or participant limits, all current participants are notified automatically.
+
+```
+PATCH /api/event/events/{id}/update_plan/
+```
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The unique ID of the plan to update.
+</ParamField>
+
+### Request Body
+
+Send any combination of plan fields you want to update. All fields are optional in a partial update.
+
+<ParamField body="title" type="string">
+  Updated event title. Maximum 50 characters.
+</ParamField>
+
+<ParamField body="description" type="string">
+  Updated description. Maximum 200 characters.
+</ParamField>
+
+<ParamField body="location" type="string">
+  Updated location. Changing this triggers a notification to all joined participants.
+</ParamField>
+
+<ParamField body="category" type="integer">
+  Updated category ID.
+</ParamField>
+
+<ParamField body="event_date" type="string">
+  Updated date in `YYYY-MM-DD` format. Changing this triggers participant notifications.
+</ParamField>
+
+<ParamField body="event_time" type="string">
+  Updated time in `HH:MM` format. Changing this triggers participant notifications.
+</ParamField>
+
+<ParamField body="min_participants" type="integer">
+  Updated minimum participant count. Changing this triggers participant notifications.
+</ParamField>
+
+<ParamField body="max_participants" type="integer">
+  Updated maximum participant count. Must remain at least `2`. Changing this triggers participant notifications.
+</ParamField>
+
+<ParamField body="event_visibility" type="string">
+  Updated visibility. One of `friends-only` or `f-o-f`.
+</ParamField>
+
+<ParamField body="cover_image" type="file">
+  Updated cover image. Send as `multipart/form-data`.
+</ParamField>
+
+<ParamField body="external_link" type="string">
+  Updated external URL.
+</ParamField>
+
+### Response
+
+Returns `200 OK` with the updated event object.
+
+- Returns `400 Bad Request` if the plan is in `completed` status.
+
+---
+
+## List Participants
+
+Retrieve all current participants for an event (both joined and interested).
+
+```
+GET /api/event/events/{id}/participants/
+```
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The unique ID of the event.
+</ParamField>
+
+### Response
+
+Returns `200 OK` with an array of participant objects.
+
+<ResponseField name="username" type="string">
+  The participant's username.
+</ResponseField>
+
+<ResponseField name="avatar" type="string | null">
+  URL of the participant's profile avatar.
+</ResponseField>
+
+```json
+[
+  {
+    "username": "maya_k",
+    "avatar": "https://cdn.wishwe.online/uploads/avatars/maya.jpg"
+  },
+  {
+    "username": "alex_j",
+    "avatar": "https://cdn.wishwe.online/uploads/avatars/alex.jpg"
+  }
+]
+```

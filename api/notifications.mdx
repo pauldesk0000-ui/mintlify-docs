@@ -1,0 +1,202 @@
+---
+title: "WishWe Notifications API: Fetch and Mark Read"
+sidebarTitle: "Notifications"
+description: "Retrieve your WishWe notification feed and unread count, and mark notifications as read through the Notifications API."
+---
+
+The Notifications API delivers real-time activity updates to authenticated users. You can retrieve a paginated feed of notifications, check your unread count without fetching the full list, and mark individual notifications or all notifications as read. Notifications are ordered with the most recent first and paginated in sets of 10.
+
+---
+
+## The notification object
+
+<ResponseField name="id" type="integer">
+  Unique identifier for the notification.
+</ResponseField>
+
+<ResponseField name="type" type="string">
+  The category of event that triggered the notification. See [Notification types](#notification-types) below for all possible values.
+</ResponseField>
+
+<ResponseField name="title" type="string">
+  Short heading for the notification (e.g. `"New friend request"`).
+</ResponseField>
+
+<ResponseField name="message" type="string">
+  Human-readable body text describing what happened.
+</ResponseField>
+
+<ResponseField name="related_object_id" type="integer">
+  The ID of the object this notification is about — a friendship ID or event ID depending on `related_object_type`.
+</ResponseField>
+
+<ResponseField name="related_object_type" type="string">
+  The type of the related object. One of:
+  - `"event"` — the notification relates to an event.
+  - `"friendship"` — the notification relates to a friend request or connection.
+</ResponseField>
+
+<ResponseField name="is_read" type="boolean">
+  `false` until you mark the notification as read.
+</ResponseField>
+
+<ResponseField name="created_at" type="string (datetime)">
+  ISO 8601 timestamp of when the notification was created.
+</ResponseField>
+
+<ResponseField name="creator" type="string">
+  The username of the user whose action triggered the notification.
+</ResponseField>
+
+<ResponseField name="recipient" type="string">
+  The username of the user who receives this notification.
+</ResponseField>
+
+---
+
+## Notification types
+
+| `type` value              | When it is sent                                              |
+|---------------------------|--------------------------------------------------------------|
+| `friend_request`          | Another user sends you a friend request.                     |
+| `friend_request_accepted` | A user you requested accepts your friend request.            |
+| `joined_event`            | A user joins an event you created.                           |
+| `interested_event`        | A user marks interest in an event you created.               |
+| `event_planned`           | An event you're connected to moves from wish to planned.     |
+| `event_start_reminder`    | An event you're attending is about to start.                 |
+| `event_updated`           | An event you're attending has been updated.                  |
+| `event_cancelled`         | An event you're attending has been cancelled.                |
+
+---
+
+## GET /api/notifications/
+
+Returns a paginated list of notifications for the authenticated user, ordered by most recent first.
+
+**Authentication:** Required
+
+### Query parameters
+
+<ParamField query="page" type="integer">
+  Page number for paginated results. Defaults to `1`. Each page contains up to 10 notifications.
+</ParamField>
+
+<ParamField query="read" type="boolean">
+  Filter by read status. Pass `true` to return only read notifications, `false` for only unread ones. Omit to return all notifications.
+</ParamField>
+
+### Response
+
+**200 OK** — returns a paginated list of notification objects.
+
+```json
+{
+  "count": 3,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 201,
+      "title": "New friend request",
+      "message": "sam_r sent you a friend request.",
+      "type": "friend_request",
+      "recipient": "alex_w",
+      "creator": "sam_r",
+      "related_object_type": "friendship",
+      "related_object_id": 31,
+      "is_read": false,
+      "created_at": "2025-07-10T14:32:00Z"
+    },
+    {
+      "id": 198,
+      "title": "Someone joined your event",
+      "message": "maya_alex joined Weekend Hike.",
+      "type": "joined_event",
+      "recipient": "alex_w",
+      "creator": "maya_alex",
+      "related_object_type": "event",
+      "related_object_id": 101,
+      "is_read": false,
+      "created_at": "2025-07-09T09:15:00Z"
+    },
+    {
+      "id": 185,
+      "title": "Friend request accepted",
+      "message": "jordan_k accepted your friend request.",
+      "type": "friend_request_accepted",
+      "recipient": "alex_w",
+      "creator": "jordan_k",
+      "related_object_type": "friendship",
+      "related_object_id": 12,
+      "is_read": true,
+      "created_at": "2025-07-08T17:44:00Z"
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/notifications/unread_count/
+
+Returns the number of unread notifications for the authenticated user. Use this lightweight endpoint to power a notification badge without loading the full feed.
+
+**Authentication:** Required
+
+<Tip>
+  Poll `unread_count` periodically (e.g. every 30–60 seconds) to keep a notification badge up to date without fetching the full notification list on every tick.
+</Tip>
+
+### Response
+
+**200 OK** — returns the count of unread notifications.
+
+<ResponseField name="count" type="integer">
+  The number of notifications where `is_read` is `false`.
+</ResponseField>
+
+```json
+{
+  "count": 5
+}
+```
+
+---
+
+## POST /api/notifications/{id}/mark_as_read/
+
+Marks a single notification as read.
+
+**Authentication:** Required
+
+### Path parameters
+
+<ParamField path="id" type="integer" required>
+  The ID of the notification to mark as read.
+</ParamField>
+
+### Response
+
+**200 OK** — the notification's `is_read` field is now `true`. The response body is empty.
+
+---
+
+## POST /api/notifications/read_all/
+
+Marks every unread notification for the authenticated user as read in a single request.
+
+**Authentication:** Required
+
+### Response
+
+**200 OK** — returns the number of notifications that were updated.
+
+<ResponseField name="updated" type="integer">
+  The count of notifications that were changed from `is_read: false` to `is_read: true`.
+</ResponseField>
+
+```json
+{
+  "updated": 5
+}
+```

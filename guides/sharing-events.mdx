@@ -1,0 +1,54 @@
+---
+title: "Sharing WishWe Events With a Link"
+sidebarTitle: "Share Events"
+description: "Generate a shareable link for any WishWe event you created and send it to anyone — even people not yet on the platform."
+---
+
+Every event on WishWe can have its own shareable deep link. Share the link via a group chat, a message, or anywhere else to invite people directly to a specific wish or plan — no need for them to hunt through their feed to find it.
+
+## Generating a Share Link
+
+<Steps>
+  <Step title="Open your event">
+    Navigate to the event you want to share. You can find it in your feed or on your profile.
+  </Step>
+
+  <Step title="Open the event menu">
+    Tap the **three-dot menu** (⋯) on the event card.
+  </Step>
+
+  <Step title="Select Share">
+    Tap **Share**. WishWe generates a unique share token for the event and returns a link. If the event already has a share link, the existing link is returned — a new token is not generated on each request.
+  </Step>
+
+  <Step title="Copy the link">
+    Copy the generated link. It follows the format:
+
+    ```
+    https://wishwe.online/share/<token>
+    ```
+  </Step>
+
+  <Step title="Send the link">
+    Paste the link into any message, group chat, or social post and send it. Anyone with the link can open it.
+  </Step>
+</Steps>
+
+## What Recipients See
+
+What a recipient sees when they open a share link depends on their relationship with you on WishWe:
+
+- **Friend or friend-of-friend with matching visibility** — they see the full event details, including the participant list, description, and any join or interest actions.
+- **Anyone else (or not yet signed up)** — they see a limited preview showing the event title, description, cover image, and creator. A prompt invites them to sign up to see the full event and participate.
+
+## Cover Images
+
+If your event has a cover image, it appears prominently in the share preview — both in the link preview when the URL is pasted into a chat and on the share page itself. Cover images are stored on AWS S3 and served through CloudFront, so they load quickly for anyone opening the link regardless of their location.
+
+<Note>
+  Only the event creator can generate a share link. The Share option does not appear in the menu for events you didn't create.
+</Note>
+
+<Tip>
+  Drop the share link into a group chat to invite people who aren't on WishWe yet. When they sign up and you connect as friends, they'll be able to join the event directly from the link they already have.
+</Tip>

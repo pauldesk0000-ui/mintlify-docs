@@ -1,0 +1,168 @@
+---
+title: "Sharing WishWe Events via API"
+sidebarTitle: "Event Sharing"
+description: "Generate and retrieve shareable event links using the WishWe API. Share tokens let anyone preview an event, even before joining the platform."
+---
+
+Share links let event creators distribute a direct URL to their wish or plan outside of the WishWe friend graph. Anyone with the link can open a preview of the event — no account required. Users who are a friend or friend-of-friend of the creator get the full event view; everyone else sees a limited preview. Joining still requires a WishWe account.
+
+---
+
+## Generate a Share Link
+
+Create a shareable URL for an event you own. If a share link already exists for the event, the same URL is returned — calling this endpoint multiple times is safe and idempotent.
+
+```
+POST /api/event/events/{id}/share/
+```
+
+<Note>
+  Only the event creator can generate a share link. Calling this endpoint on an event you did not create returns `403 Forbidden`.
+</Note>
+
+<Tip>
+  Call this endpoint each time you need the share URL — it's idempotent and returns the same link if one already exists. You don't need to cache the token on your end.
+</Tip>
+
+### Path Parameters
+
+<ParamField path="id" type="integer" required>
+  The unique ID of the event for which you want to generate a share link.
+</ParamField>
+
+### Response
+
+Returns `200 OK` with a `share_url` containing the full shareable link.
+
+<ResponseField name="share_url" type="string">
+  The full URL that anyone can open to preview the event. Follows the format `https://wishwe.online/share/<uuid>`.
+</ResponseField>
+
+```json
+{
+  "share_url": "https://wishwe.online/share/ac966711-751a-4da5-a733-223ba91c50e0"
+}
+```
+
+### Error Responses
+
+| Status | Description |
+|--------|-------------|
+| `403 Forbidden` | You are not the creator of this event. |
+| `404 Not Found` | No event exists with the given `id`. |
+
+---
+
+## View a Shared Event
+
+Retrieve an event by its share token. This endpoint is **public** — it does not require authentication. The response shape depends on whether the requesting user has access to the event based on visibility rules and their relationship to the creator.
+
+```
+GET /api/event/share/{token}/
+```
+
+### Path Parameters
+
+<ParamField path="token" type="string" required>
+  The UUID share token from the share URL (e.g. `ac966711-751a-4da5-a733-223ba91c50e0`).
+</ParamField>
+
+### Access Rules
+
+The `has_access` flag in the response is `true` when the requesting user meets any of the following:
+
+- The user **is** the event creator.
+- The event visibility is `friends-only` and the user is a **direct friend** of the creator.
+- The event visibility is `f-o-f` and the user is a **direct friend or friend-of-a-friend** of the creator.
+
+When `has_access` is `false` (including unauthenticated requests), only the limited preview is returned.
+
+### Response — Full Access
+
+Returns `200 OK`. The `event` field contains the complete event object; `preview` is `null`.
+
+<ResponseField name="has_access" type="boolean">
+  `true` when the requesting user has permission to view the full event.
+</ResponseField>
+
+<ResponseField name="event" type="object">
+  The full event object (same shape as all other event endpoints). Present only when `has_access` is `true`.
+</ResponseField>
+
+<ResponseField name="preview" type="null">
+  Always `null` when `has_access` is `true`.
+</ResponseField>
+
+```json
+{
+  "has_access": true,
+  "event": {
+    "id": 55,
+    "event_type": "plan",
+    "event_visibility": "f-o-f",
+    "title": "Weekend Hike at Runyon Canyon",
+    "description": "Casual hike, bring water and snacks.",
+    "location": "Runyon Canyon, Los Angeles",
+    "cover_image": null,
+    "category": "Outdoors",
+    "creator": "jess_w",
+    "creator_avatar": "https://cdn.wishwe.online/uploads/avatars/jess.jpg",
+    "event_date": "2025-08-23",
+    "event_time": "08:00",
+    "timeframe_text": null,
+    "min_participants": 2,
+    "max_participants": 10,
+    "participants_count": 4,
+    "interested_count": 0,
+    "status": "active",
+    "available_spots": 6,
+    "is_full": false,
+    "can_join": true,
+    "has_share_link": true,
+    "expires_at": "2025-08-23T08:05:00Z",
+    "created_at": "2025-07-15T10:30:00Z",
+    "updated_at": "2025-07-15T10:30:00Z"
+  },
+  "preview": null
+}
+```
+
+### Response — Preview Only
+
+Returns `200 OK`. The `event` field is `null`; `preview` contains limited event details.
+
+<ResponseField name="has_access" type="boolean">
+  `false` when the requesting user does not have permission to view the full event.
+</ResponseField>
+
+<ResponseField name="event" type="null">
+  Always `null` when `has_access` is `false`.
+</ResponseField>
+
+<ResponseField name="preview" type="object">
+  A limited event object. Contains only `id`, `title`, `description`, `cover_image`, and a nested `creator` object with `id`, `username`, and `avatar`.
+</ResponseField>
+
+```json
+{
+  "has_access": false,
+  "event": null,
+  "preview": {
+    "id": 55,
+    "title": "Weekend Hike at Runyon Canyon",
+    "description": "Casual hike, bring water and snacks.",
+    "cover_image": null,
+    "creator": {
+      "id": 12,
+      "username": "jess_w",
+      "avatar": "https://cdn.wishwe.online/uploads/avatars/jess.jpg"
+    }
+  }
+}
+```
+
+### Error Responses
+
+| Status | Description |
+|--------|-------------|
+| `404 Not Found` | No share link exists for the given token. |

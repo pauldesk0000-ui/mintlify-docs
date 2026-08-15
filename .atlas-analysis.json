@@ -1,0 +1,131 @@
+{
+  "projectType": "saas",
+  "projectName": "WishWe",
+  "projectDescription": "WishWe is a social planning app that lets you turn vague ideas into real events — post wishes with friends, commit to plans, and keep track of who's joining.",
+  "theme": "almond",
+  "primaryColor": "#485028",
+  "lightColor": "#9c9c84",
+  "darkColor": "#485028",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Overview",
+        "groups": [
+          {
+            "group": "Get Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "account-setup"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "concepts/wishes-and-plans",
+              "concepts/visibility",
+              "concepts/friends",
+              "concepts/notifications"
+            ]
+          },
+          {
+            "group": "Using WishWe",
+            "pages": [
+              "guides/creating-a-wish",
+              "guides/creating-a-plan",
+              "guides/converting-a-wish",
+              "guides/joining-events",
+              "guides/sharing-events",
+              "guides/managing-your-profile"
+            ]
+          },
+          {
+            "group": "Mobile App",
+            "pages": [
+              "mobile/overview",
+              "mobile/ios",
+              "mobile/android"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "API Reference",
+        "groups": [
+          {
+            "group": "Authentication",
+            "pages": [
+              "api/authentication",
+              "api/auth-endpoints"
+            ]
+          },
+          {
+            "group": "Events",
+            "pages": [
+              "api/events",
+              "api/event-actions",
+              "api/event-sharing"
+            ]
+          },
+          {
+            "group": "Users & Friends",
+            "pages": [
+              "api/profile",
+              "api/friends",
+              "api/notifications"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Wishes — open-ended ideas with loose timeframes that friends can mark as interested",
+    "Plans — date-and-time events with participant capacity that friends can join",
+    "Convert a wish into a plan when an idea gains enough momentum",
+    "Visibility control — publish events to friends only or friends-of-friends",
+    "Friend management with requests, search, and personal invite links",
+    "In-app notification feed covering event activity and friend requests",
+    "Shareable deep links for events with S3-backed cover images",
+    "Google OAuth and email sign-up with verification code",
+    "Avatar upload with in-browser cropping",
+    "Mobile app (React Native / Expo) for iOS and Android"
+  ],
+  "publicApiSurface": [
+    "POST /api/user/auth/email-start/",
+    "POST /api/user/auth/verify-code/",
+    "POST /api/user/auth/resend-code/",
+    "POST /api/user/auth/set-password/",
+    "POST /api/user/auth/reset-password/",
+    "POST /api/user/auth/set-new-password/",
+    "POST /api/user/auth/token/",
+    "POST /api/user/auth/token/refresh/",
+    "POST /api/user/auth/logout/",
+    "POST /api/user/auth/google/",
+    "GET/PATCH /api/user/profile/me/",
+    "GET /api/user/users/",
+    "GET /api/user/users/{id}/",
+    "GET/POST /api/user/friendship/",
+    "GET /api/user/friendship/friends/",
+    "GET /api/user/friendship/incoming/",
+    "GET/POST /api/user/invite/",
+    "GET /api/event/category/",
+    "GET /api/event/events/",
+    "GET /api/event/events/{id}/",
+    "DELETE /api/event/events/{id}/",
+    "POST /api/event/events/create_wish/",
+    "POST /api/event/events/create_plan/",
+    "PATCH /api/event/events/{id}/update_wish/",
+    "PATCH /api/event/events/{id}/update_plan/",
+    "POST /api/event/events/{id}/join_plan/",
+    "POST /api/event/events/{id}/interested_in_wish/",
+    "POST /api/event/events/{id}/leave_event/",
+    "POST /api/event/events/{id}/archive_plan/",
+    "POST /api/event/events/{id}/convert_to_plan/",
+    "POST /api/event/events/{id}/copy_wish/",
+    "POST /api/event/events/{id}/share/",
+    "GET /api/event/share/{token}/",
+    "GET /api/notifications/",
+    "GET /api/notifications/unread_count/"
+  ]
+}

@@ -1,0 +1,346 @@
+---
+title: "WishWe Profile API: Read and Update Your User Profile"
+sidebarTitle: "Profile"
+description: "Retrieve and update your WishWe user profile — username, bio, avatar, city, date of birth, gender, privacy settings, and more."
+---
+
+The Profile API gives you full access to WishWe user profiles. You can read the authenticated user's own profile, apply partial updates (including avatar uploads), search for other users by username, and fetch any user's public profile or their list of events. All endpoints require a valid access token unless noted otherwise.
+
+---
+
+## The profile object
+
+<ResponseField name="id" type="integer">
+  Unique identifier for the profile record.
+</ResponseField>
+
+<ResponseField name="user" type="string">
+  The email address of the account that owns this profile (read-only).
+</ResponseField>
+
+<ResponseField name="user_id" type="integer">
+  The ID of the account that owns this profile (read-only).
+</ResponseField>
+
+<ResponseField name="username" type="string">
+  The user's unique public handle. Minimum 3 characters.
+</ResponseField>
+
+<ResponseField name="first_name" type="string">
+  The user's first name.
+</ResponseField>
+
+<ResponseField name="last_name" type="string">
+  The user's last name.
+</ResponseField>
+
+<ResponseField name="bio" type="string">
+  A short free-text biography shown on the user's public profile.
+</ResponseField>
+
+<ResponseField name="city" type="object">
+  The user's city, represented as an object with two sub-fields.
+
+  <Expandable title="city fields">
+    <ResponseField name="name" type="string">
+      City name (e.g. `"Amsterdam"`).
+    </ResponseField>
+    <ResponseField name="country" type="string">
+      Country name (e.g. `"Netherlands"`).
+    </ResponseField>
+  </Expandable>
+</ResponseField>
+
+<ResponseField name="date_of_birth" type="string (date)">
+  Date of birth in `YYYY-MM-DD` format.
+</ResponseField>
+
+<ResponseField name="gender" type="string">
+  One of `"Male"`, `"Female"`, or `"Other"`.
+</ResponseField>
+
+<ResponseField name="social_media_url" type="string (URL)">
+  A link to any external social profile (e.g. Instagram, Twitter).
+</ResponseField>
+
+<ResponseField name="avatar" type="string (URL)">
+  Full URL of the user's avatar image. `null` when no avatar has been uploaded.
+</ResponseField>
+
+<ResponseField name="is_private" type="boolean">
+  When `true`, the profile is hidden from public search results and other users cannot view it directly.
+</ResponseField>
+
+<ResponseField name="is_onboarded" type="boolean">
+  `true` after the user has completed the onboarding flow and set their username.
+</ResponseField>
+
+---
+
+## GET /api/user/profile/me/
+
+Returns the full profile of the currently authenticated user.
+
+**Authentication:** Required
+
+### Response
+
+**200 OK** — returns the profile object for the authenticated user.
+
+```json
+{
+  "id": 42,
+  "user": "alex@example.com",
+  "user_id": 7,
+  "username": "alex_w",
+  "first_name": "Alex",
+  "last_name": "Walker",
+  "bio": "Event enthusiast. Always planning something.",
+  "city": "Amsterdam",
+  "date_of_birth": "1995-06-14",
+  "gender": "Male",
+  "social_media_url": "https://instagram.com/alex_w",
+  "avatar": "https://cdn.wishwe.online/uploads/avatars/a1b2c3.jpg",
+  "is_private": false,
+  "is_onboarded": true,
+  "has_seen_feed_tour": false
+}
+```
+
+---
+
+## PATCH /api/user/profile/me/
+
+Partially updates the authenticated user's profile. Send only the fields you want to change.
+
+**Authentication:** Required
+
+<Note>
+  To upload a new avatar, send the request as `multipart/form-data` and include the image file under the `avatar` key. Plain `application/json` requests cannot carry file uploads.
+</Note>
+
+### Body
+
+<ParamField body="username" type="string">
+  New username. Must be unique across all profiles and at least 3 characters long.
+</ParamField>
+
+<ParamField body="first_name" type="string">
+  Updated first name.
+</ParamField>
+
+<ParamField body="last_name" type="string">
+  Updated last name.
+</ParamField>
+
+<ParamField body="bio" type="string">
+  Updated bio text.
+</ParamField>
+
+<ParamField body="city" type="integer">
+  ID of the city object to associate with this profile.
+</ParamField>
+
+<ParamField body="date_of_birth" type="string (date)">
+  Date of birth in `YYYY-MM-DD` format.
+</ParamField>
+
+<ParamField body="gender" type="string">
+  One of `"Male"`, `"Female"`, or `"Other"`.
+</ParamField>
+
+<ParamField body="social_media_url" type="string (URL)">
+  Link to an external social profile.
+</ParamField>
+
+<ParamField body="avatar" type="file">
+  Profile picture. Send as a file field in a `multipart/form-data` request. Accepted types: JPEG, PNG, WebP.
+</ParamField>
+
+<ParamField body="is_private" type="boolean">
+  Set to `true` to hide your profile from public search and direct lookup.
+</ParamField>
+
+### Response
+
+**200 OK** — returns the full updated profile object.
+
+```json
+{
+  "id": 42,
+  "user": "alex@example.com",
+  "user_id": 7,
+  "username": "alex_w",
+  "first_name": "Alex",
+  "last_name": "Walker",
+  "bio": "Updated bio here.",
+  "city": "Amsterdam",
+  "date_of_birth": "1995-06-14",
+  "gender": "Male",
+  "social_media_url": "https://instagram.com/alex_w",
+  "avatar": "https://cdn.wishwe.online/uploads/avatars/new_a1b2.jpg",
+  "is_private": false,
+  "is_onboarded": true,
+  "has_seen_feed_tour": false
+}
+```
+
+---
+
+## GET /api/user/users/
+
+Returns a paginated list of public user profiles. You can filter by username using the `username` query parameter. Private profiles are excluded from results.
+
+**Authentication:** Required
+
+### Query parameters
+
+<ParamField query="username" type="string">
+  Case-insensitive partial match on the `username` field. For example, `?username=alex` returns profiles whose username contains `"alex"`.
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Page number for paginated results. Defaults to `1`.
+</ParamField>
+
+### Response
+
+**200 OK** — returns a paginated list of profile objects.
+
+```json
+{
+  "count": 2,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 42,
+      "user": "alex@example.com",
+      "user_id": 7,
+      "username": "alex_w",
+      "first_name": "Alex",
+      "last_name": "Walker",
+      "bio": "Event enthusiast.",
+      "city": "Amsterdam",
+      "avatar": "https://cdn.wishwe.online/uploads/avatars/a1b2c3.jpg",
+      "is_private": false,
+      "is_onboarded": true
+    },
+    {
+      "id": 55,
+      "user": "maya@example.com",
+      "user_id": 12,
+      "username": "maya_alex",
+      "first_name": "Maya",
+      "last_name": "Ortiz",
+      "bio": null,
+      "city": "Barcelona",
+      "avatar": null,
+      "is_private": false,
+      "is_onboarded": true
+    }
+  ]
+}
+```
+
+---
+
+## GET /api/user/users/{id}/
+
+Returns the public profile for the user with the given ID.
+
+**Authentication:** Required
+
+### Path parameters
+
+<ParamField path="id" type="integer" required>
+  The ID of the user whose profile you want to retrieve.
+</ParamField>
+
+### Response
+
+**200 OK** — returns the profile object.
+
+**403 Forbidden** — the requested profile is private and you are not that user.
+
+**404 Not Found** — no user exists with the given ID.
+
+```json
+{
+  "id": 55,
+  "user": "maya@example.com",
+  "user_id": 12,
+  "username": "maya_alex",
+  "first_name": "Maya",
+  "last_name": "Ortiz",
+  "bio": "Barcelona-based planner.",
+  "city": "Barcelona",
+  "date_of_birth": "1998-03-22",
+  "gender": "Female",
+  "social_media_url": null,
+  "avatar": null,
+  "is_private": false,
+  "is_onboarded": true
+}
+```
+
+---
+
+## GET /api/user/users/{id}/events/
+
+Returns a paginated list of events that the user has created or joined.
+
+**Authentication:** Required
+
+### Path parameters
+
+<ParamField path="id" type="integer" required>
+  The ID of the user whose events you want to retrieve.
+</ParamField>
+
+### Query parameters
+
+<ParamField query="tab" type="string">
+  Filter events by type or status. Accepted values:
+  - `plans` — active and closed plan-type events.
+  - `wishes` — active and closed wish-type events.
+  - `archive` — completed events.
+</ParamField>
+
+<ParamField query="sort" type="string">
+  Sort order for the results. Pass `soonest` to sort by the earliest upcoming date. Defaults to most recently added.
+</ParamField>
+
+<ParamField query="title" type="string">
+  Case-insensitive partial match on the event title.
+</ParamField>
+
+<ParamField query="page" type="integer">
+  Page number for paginated results. Defaults to `1`.
+</ParamField>
+
+### Response
+
+**200 OK** — returns a paginated list of event objects.
+
+```json
+{
+  "count": 1,
+  "next": null,
+  "previous": null,
+  "results": [
+    {
+      "id": 101,
+      "title": "Weekend Hike",
+      "event_date": "2025-08-10",
+      "event_time": "09:00:00",
+      "status": "active",
+      "event_type": "plan",
+      "creator": {
+        "username": "alex_w",
+        "avatar": "https://cdn.wishwe.online/uploads/avatars/a1b2c3.jpg"
+      }
+    }
+  ]
+}
+```

@@ -1,0 +1,63 @@
+---
+title: "How to Create a Plan on WishWe"
+sidebarTitle: "Create a Plan"
+description: "Create a WishWe plan with a date, time, location, and participant cap. Friends can join until the plan reaches capacity or the event date passes."
+---
+
+A **Plan** is a committed, date-based event. Unlike a Wish, a Plan has a specific date, start time, and a participant cap — friends **join** it rather than expressing vague interest. Use a Plan when you're ready to make something concrete happen and want to track exactly who's coming.
+
+## Creating a Plan
+
+<Steps>
+  <Step title="Open the create event modal">
+    Tap the **+** button in your feed to open the event creation modal.
+  </Step>
+
+  <Step title="Select Plan as the event type">
+    Choose **Plan** from the event type selector at the top of the modal.
+  </Step>
+
+  <Step title="Fill in the plan details">
+    Complete the following fields:
+
+    | Field | Details |
+    |---|---|
+    | **Title** | A short name for the event (max 50 characters) |
+    | **Description** | More context or details (max 200 characters) |
+    | **Location** | Where the event takes place |
+    | **Category** | The type of activity (e.g. Food, Outdoors, Music) |
+    | **Date** | The date the event occurs |
+    | **Time** | The start time of the event |
+    | **Min participants** | The minimum number of people needed for the plan to work |
+    | **Max participants** | The maximum number of spots available (must be at least 2) |
+    | **Cover image** | An optional photo to make the card stand out in the feed |
+    | **Visibility** | **Friends only** or **Friends of friends** |
+    | **External link** | An optional URL for extra context (e.g. a booking page) |
+  </Step>
+
+  <Step title="Post your plan">
+    Tap **Post**. Your plan appears in friends' feeds with the number of available spots shown on the card.
+  </Step>
+</Steps>
+
+<Note>
+  You must set both a date and a time for a Plan. WishWe uses both to calculate when the plan expires.
+</Note>
+
+## Capacity & Spots
+
+Plans are capacity-limited. The **min participants** value is the minimum headcount you need — it's informational and helps friends understand if the plan needs a group to work. The **max participants** value is the hard cap.
+
+As friends join, `participants_count` increments and `available_spots` decrements. Once `participants_count` reaches `max_participants`, the plan is full — the Join button is hidden and the card displays "Full" to anyone who views it.
+
+## Plan Expiry
+
+WishWe automatically marks a plan as expired once the event date and time passes. Expired plans are no longer joinable and no longer appear in the active feed. They move to your profile's event history where you can review them.
+
+## Archiving a Plan
+
+After your event is done, open the three-dot menu on the plan card and select **Archive**. This marks the plan as completed and moves it to your archived events. Use this to keep your active events list clean and give the plan a clear end state.
+
+<Tip>
+  Set `max_participants` to a realistic number — once full, friends can still view the plan but cannot join. If you want to leave room for spontaneous additions, set the cap slightly higher than your ideal group size.
+</Tip>

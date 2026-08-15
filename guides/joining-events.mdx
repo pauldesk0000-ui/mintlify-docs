@@ -1,0 +1,52 @@
+---
+title: "Joining and Leaving Events on WishWe"
+sidebarTitle: "Join Events"
+description: "Mark yourself as interested in a wish or join a plan on WishWe. Track events you've joined, leave if your plans change, and see who else is going."
+---
+
+WishWe has two ways to participate in an event depending on its type. For Wishes, you express interest without committing. For Plans, you join and take up one of the available spots. Both actions are reversible — you can leave any event you've participated in.
+
+## Showing Interest in a Wish
+
+When you see a Wish in your feed that appeals to you, tap the **Interested** button on the card. This does three things:
+
+- Your avatar appears in the participant preview on the wish card.
+- The wish creator sees your interest reflected in the `interested_count` on their card.
+- If the wish creator later converts the wish into a Plan, you receive an `event_planned` notification letting you know it's happening.
+
+Marking yourself as Interested doesn't commit you to anything — it just signals enthusiasm to the wish creator.
+
+## Joining a Plan
+
+To join a Plan, tap the **Join** button on the plan card. When you join:
+
+- The plan's `available_spots` count decreases by one.
+- Your avatar is added to the participant preview on the card.
+- The plan creator receives a `joined_event` notification.
+
+You can only join a plan while it still has available spots and before it expires.
+
+## Viewing Participants
+
+To see the full list of people joining or interested in an event, open the event detail view by tapping the event title. The detail view shows every participant's avatar and username. The feed card also displays a preview of up to three participant avatars at a glance.
+
+## Leaving an Event
+
+To leave an event, tap the action button on the card (it shows **Joined** or **Interested** when you're participating) and confirm the prompt. When you leave:
+
+- Your participation status is removed.
+- For Plans, the `available_spots` count increases by one, freeing up the spot for someone else.
+
+## Feed Sorting
+
+Use the sort options at the top of your feed to surface the most relevant events:
+
+| Sort option | Behaviour |
+|---|---|
+| **Recently added** (default) | Shows the newest events first |
+| **Soonest first** (`sort=soonest`) | Shows plans ordered by date and time, earliest first |
+| **Social heat** (`sort=heat`) | Shows events with the most friend activity — plans where friends have joined, wishes where friends have marked themselves interested — ranked at the top |
+
+<Note>
+  You cannot join a plan that is already full or that has passed its event date and time. The Join button is hidden on full or expired plans.
+</Note>
