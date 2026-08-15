@@ -42,6 +42,10 @@ All event endpoints return an event object with the following fields:
   URL of the uploaded cover image, or `null` if none was provided.
 </ResponseField>
 
+<ResponseField name="external_link" type="string | null">
+  An optional URL with additional information about the event, or `null` if not provided.
+</ResponseField>
+
 <ResponseField name="category" type="string | null">
   The name of the category assigned to the event (e.g. `"Music"`, `"Sports"`), or `null`.
 </ResponseField>
@@ -75,7 +79,7 @@ All event endpoints return an event object with the following fields:
 </ResponseField>
 
 <ResponseField name="participants_count" type="integer">
-  Number of users who have joined the plan. For wishes, reflects the creator's initial interested count.
+  Number of users who have joined the plan. Always `0` for wishes — use `interested_count` to track wish interest.
 </ResponseField>
 
 <ResponseField name="interested_count" type="integer">
@@ -97,14 +101,6 @@ All event endpoints return an event object with the following fields:
   `true` when a plan has reached its `max_participants`. Always `false` for wishes.
 </ResponseField>
 
-<ResponseField name="can_join" type="boolean">
-  `true` when the event is `active`, not full, and not expired.
-</ResponseField>
-
-<ResponseField name="has_share_link" type="boolean">
-  `true` if a shareable link has been generated for this event.
-</ResponseField>
-
 <ResponseField name="mutual_friend" type="object | null">
   If the event is visible through a friend-of-friend connection, this contains `{ "id": integer, "username": string }` for the mutual friend. `null` if the creator is a direct friend.
 </ResponseField>
@@ -117,16 +113,8 @@ All event endpoints return an event object with the following fields:
   An array of up to 6 participants (joined for plans, interested for wishes). Each item contains `{ "username": string, "avatar": string | null }`.
 </ResponseField>
 
-<ResponseField name="expires_at" type="string | null">
-  ISO 8601 datetime at which the plan expires (set to 5 minutes after `event_date` + `event_time`). `null` for wishes.
-</ResponseField>
-
 <ResponseField name="created_at" type="string">
   ISO 8601 datetime when the event was created.
-</ResponseField>
-
-<ResponseField name="updated_at" type="string">
-  ISO 8601 datetime when the event was last updated.
 </ResponseField>
 
 ---
@@ -180,6 +168,7 @@ Returns a paginated list of event objects.
       "description": "Outdoor film screening with blankets and snacks.",
       "location": "Skyline Rooftop, Brooklyn",
       "cover_image": "https://cdn.wishwe.online/uploads/events/abc123.jpg",
+      "external_link": null,
       "category": "Entertainment",
       "creator": "maya_k",
       "creator_avatar": "https://cdn.wishwe.online/uploads/avatars/maya.jpg",
@@ -198,11 +187,7 @@ Returns a paginated list of event objects.
       "status": "active",
       "available_spots": 12,
       "is_full": false,
-      "can_join": true,
-      "has_share_link": false,
-      "expires_at": "2025-08-10T20:05:00Z",
-      "created_at": "2025-07-01T14:22:00Z",
-      "updated_at": "2025-07-01T14:22:00Z"
+      "created_at": "2025-07-01T14:22:00Z"
     }
   ]
 }
@@ -252,10 +237,6 @@ POST /api/event/events/create_wish/
   Optional cover image. Must be a valid image file type. Send as `multipart/form-data`.
 </ParamField>
 
-<ParamField body="external_link" type="string">
-  Optional URL linking to more information about the wish.
-</ParamField>
-
 ### Response
 
 Returns `201 Created` with the full event object.
@@ -269,6 +250,7 @@ Returns `201 Created` with the full event object.
   "description": "Always wanted to try this with friends!",
   "location": "Napa Valley, CA",
   "cover_image": null,
+  "external_link": null,
   "category": "Adventure",
   "creator": "jess_w",
   "creator_avatar": "https://cdn.wishwe.online/uploads/avatars/jess.jpg",
@@ -285,11 +267,7 @@ Returns `201 Created` with the full event object.
   "status": "active",
   "available_spots": null,
   "is_full": false,
-  "can_join": true,
-  "has_share_link": false,
-  "expires_at": null,
-  "created_at": "2025-07-15T09:00:00Z",
-  "updated_at": "2025-07-15T09:00:00Z"
+  "created_at": "2025-07-15T09:00:00Z"
 }
 ```
 
@@ -362,6 +340,7 @@ Returns `201 Created` with the full event object.
   "description": "Casual hike, bring water and snacks.",
   "location": "Runyon Canyon, Los Angeles",
   "cover_image": null,
+  "external_link": null,
   "category": "Outdoors",
   "creator": "jess_w",
   "creator_avatar": "https://cdn.wishwe.online/uploads/avatars/jess.jpg",
@@ -378,11 +357,7 @@ Returns `201 Created` with the full event object.
   "status": "active",
   "available_spots": 9,
   "is_full": false,
-  "can_join": true,
-  "has_share_link": false,
-  "expires_at": "2025-08-23T08:05:00Z",
-  "created_at": "2025-07-15T10:30:00Z",
-  "updated_at": "2025-07-15T10:30:00Z"
+  "created_at": "2025-07-15T10:30:00Z"
 }
 ```
 

@@ -1,5 +1,5 @@
 ---
-title: "Run WishWe on iOS"
+title: "Set Up and Run WishWe on the iOS Simulator with Expo"
 sidebarTitle: "iOS"
 description: "Set up and run the WishWe mobile app on an iOS Simulator or device using Expo. Covers prerequisites, backend setup, and launch steps."
 ---
@@ -44,7 +44,8 @@ The mobile app requires a running Django API. Open a terminal, navigate to the r
     ```bash
     python3 -m venv .venv
     source .venv/bin/activate
-    pip install -r requirements.txt
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
     ```
   </Step>
 
@@ -85,7 +86,6 @@ Open a second terminal, then install dependencies and set the API URL:
     Open `mobile/.env` and set:
 
     ```bash
-    # Set EXPO_PUBLIC_API_URL=http://localhost:8000
     EXPO_PUBLIC_API_URL=http://localhost:8000
     ```
   </Step>

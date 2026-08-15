@@ -1,5 +1,5 @@
 ---
-title: "Run WishWe on Android"
+title: "Set Up and Run WishWe on Android Emulator with Expo"
 sidebarTitle: "Android"
 description: "Set up and launch the WishWe mobile app on an Android Emulator using Expo. Covers Android Studio setup, backend configuration, and launch steps."
 ---
@@ -41,13 +41,23 @@ The mobile app requires a running Django API. Open a terminal, navigate to the r
   </Step>
 
   <Step title="Create a virtual environment and install dependencies">
+    On macOS or Linux:
+
     ```bash
     python3 -m venv .venv
     source .venv/bin/activate
-    pip install -r requirements.txt
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
     ```
 
-    On Windows, run these commands in Git Bash and use `source .venv/Scripts/activate` instead.
+    On Windows (Git Bash):
+
+    ```bash
+    py -3 -m venv .venv
+    source .venv/Scripts/activate
+    python -m pip install --upgrade pip
+    python -m pip install -r requirements.txt
+    ```
   </Step>
 
   <Step title="Apply database migrations">
@@ -87,7 +97,6 @@ Open a second terminal, then install dependencies and set the API URL:
     Open `mobile/.env` and set:
 
     ```bash
-    # Set EXPO_PUBLIC_API_URL=http://10.0.2.2:8000
     EXPO_PUBLIC_API_URL=http://10.0.2.2:8000
     ```
 

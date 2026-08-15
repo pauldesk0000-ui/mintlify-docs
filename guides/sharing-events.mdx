@@ -18,13 +18,13 @@ Every event on WishWe can have its own shareable deep link. Share the link via a
   </Step>
 
   <Step title="Select Share">
-    Tap **Share**. WishWe generates a unique share token for the event and returns a link. If the event already has a share link, the existing link is returned — a new token is not generated on each request.
+    Tap **Share**. WishWe generates a unique share link for the event. If the event already has a share link, the existing link is returned — a new one is not generated on each request.
   </Step>
 
   <Step title="Copy the link">
     Copy the generated link. It follows the format:
 
-    ```
+    ```text
     https://wishwe.online/share/<token>
     ```
   </Step>
@@ -43,7 +43,7 @@ What a recipient sees when they open a share link depends on their relationship 
 
 ## Cover Images
 
-If your event has a cover image, it appears prominently in the share preview — both in the link preview when the URL is pasted into a chat and on the share page itself. Cover images are stored on AWS S3 and served through CloudFront, so they load quickly for anyone opening the link regardless of their location.
+If your event has a cover image, it appears prominently in the share preview — both in the link preview when the URL is pasted into a chat and on the share page itself. Cover images are served through a CDN so they load quickly for anyone opening the link, regardless of their location.
 
 <Note>
   Only the event creator can generate a share link. The Share option does not appear in the menu for events you didn't create.

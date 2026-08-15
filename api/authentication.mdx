@@ -1,10 +1,10 @@
 ---
-title: "Authenticating With the WishWe API"
+title: "WishWe API Authentication Guide: Cookies and Tokens"
 sidebarTitle: "Authentication"
-description: "WishWe uses JWT bearer tokens for API authentication. Learn how to obtain tokens via email or Google OAuth, refresh them, and handle auth errors."
+description: "WishWe uses cookie-based JWTs for authentication. Learn how to complete the email or Google OAuth flow, refresh tokens, and handle auth errors."
 ---
 
-WishWe's API authenticates requests with JWTs. Tokens are issued after a successful login or registration and must be included in every authenticated request as a bearer token.
+WishWe's API issues JWTs as cookies after a successful login or registration. Browser-based clients receive the tokens automatically in `Set-Cookie` response headers; native clients (such as mobile apps) must read those headers manually and forward the access token as a bearer token on each authenticated call.
 
 ## Base URL
 
@@ -16,12 +16,14 @@ https://wishwe.online
 
 ## How Authentication Works
 
-After you complete a login or registration flow, the server sets two `HttpOnly` cookies on the response:
+After you complete a login or registration flow, the server sets two cookies on the response:
 
-- **`access_token`** — a short-lived JWT you include on every authenticated request
+- **`access_token`** — a short-lived JWT required on every authenticated request
 - **`refresh_token`** — a longer-lived token used only to obtain a new access token
 
-For each authenticated request, read the `access_token` value and pass it in the `Authorization` header:
+**Browser clients** — cookies are set automatically and the browser attaches them to subsequent same-origin requests with no extra work on your part.
+
+**Native clients** — read the `access_token` and `refresh_token` values from the `Set-Cookie` headers in the login or registration response and store them securely (for example, in an encrypted store like `expo-secure-store`). Then attach the access token manually on every authenticated call:
 
 ```http
 Authorization: Bearer <access_token>
@@ -30,16 +32,14 @@ Authorization: Bearer <access_token>
 When the access token expires, call the refresh endpoint to get a new one without requiring the user to log in again.
 
 <Note>
-  For browser-based apps, the server sets `access_token` and `refresh_token` cookies automatically and the browser sends them with each request. For native clients (such as mobile apps), read the tokens directly from the `Set-Cookie` headers in the login or registration response and store them securely — for example, in an encrypted store like `expo-secure-store`. Then attach the access token manually via the `Authorization` header on every authenticated call.
+  For native clients, the tokens arrive as `Set-Cookie` response headers. Read the values with a
+  cookie-parsing utility rather than relying on a built-in cookie jar, which may silently drop
+  `Secure` cookies in non-HTTPS development environments.
 </Note>
-
-<Tip>
-  The `Authorization: Bearer` header takes precedence over the cookie on the backend. If you send both, the bearer token wins.
-</Tip>
 
 ### Token Refresh
 
-Access tokens are short-lived. When a request returns `401`, use the refresh endpoint to swap your refresh token for a new access token. The refresh endpoint is the **one exception** to the bearer token pattern — it reads the refresh token from a cookie header instead:
+Access tokens are short-lived. When a request returns `401`, use the refresh endpoint to swap your refresh token for a new access token. The refresh endpoint is the **one exception** to the bearer token pattern — it reads the refresh token from a `Cookie` header instead of the request body or an `Authorization` header:
 
 ```http
 Cookie: refresh_token=<refresh_token>

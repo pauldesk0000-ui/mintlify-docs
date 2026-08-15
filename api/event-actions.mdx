@@ -124,9 +124,9 @@ Promote a wish into a concrete plan by adding a date, time, and participant cap.
 POST /api/event/events/{id}/convert_to_plan/
 ```
 
-<Note>
+<Warning>
   Conversion is **irreversible**. Once a wish becomes a plan, it cannot be converted back. All users who were interested in the wish are notified of the new plan.
-</Note>
+</Warning>
 
 ### Path Parameters
 
@@ -152,13 +152,9 @@ POST /api/event/events/{id}/convert_to_plan/
   Minimum number of participants. Optional; defaults to the value already set on the wish.
 </ParamField>
 
-<ParamField body="external_link" type="string">
-  Optional URL with additional information about the plan.
-</ParamField>
-
 ### Response
 
-Returns `200 OK` with the updated event object. The `event_type` is now `plan`, and `expires_at` is set to 5 minutes after the scheduled event datetime.
+Returns `200 OK` with the updated event object. The `event_type` is now `plan`, and `expires_at` is calculated internally as 5 minutes after the scheduled event datetime.
 
 ```json
 {
@@ -172,7 +168,6 @@ Returns `200 OK` with the updated event object. The `event_type` is now `plan`, 
   "participants_count": 1,
   "interested_count": 3,
   "available_spots": 11,
-  "expires_at": "2025-09-14T18:35:00Z",
   "user_participation_status": "joined"
 }
 ```
@@ -311,7 +306,7 @@ Returns `200 OK` with the updated event object.
 
 ## Update a Plan
 
-Partially update a plan you created. Only the event creator can call this endpoint. If you change the date, time, location, or participant limits, all current participants are notified automatically.
+Partially update a plan you created. Only the event creator can call this endpoint. If you change the date, time, location, or participant limits, all current participants are notified.
 
 ```
 PATCH /api/event/events/{id}/update_plan/

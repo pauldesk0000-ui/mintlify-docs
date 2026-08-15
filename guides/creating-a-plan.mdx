@@ -25,13 +25,13 @@ A **Plan** is a committed, date-based event. Unlike a Wish, a Plan has a specifi
     | **Title** | A short name for the event (max 50 characters) |
     | **Description** | More context or details (max 200 characters) |
     | **Location** | Where the event takes place |
-    | **Category** | The type of activity (e.g. Food, Outdoors, Music) |
     | **Date** | The date the event occurs |
     | **Time** | The start time of the event |
-    | **Min participants** | The minimum number of people needed for the plan to work |
     | **Max participants** | The maximum number of spots available (must be at least 2) |
+    | **Min participants** | The minimum number of people needed for the plan to work (optional, defaults to 1) |
+    | **Category** | The type of activity (e.g. Food, Outdoors, Music) — optional |
     | **Cover image** | An optional photo to make the card stand out in the feed |
-    | **Visibility** | **Friends only** or **Friends of friends** |
+    | **Visibility** | **Friends only** or **Friends of friends** (default: Friends of friends) |
     | **External link** | An optional URL for extra context (e.g. a booking page) |
   </Step>
 
@@ -48,7 +48,7 @@ A **Plan** is a committed, date-based event. Unlike a Wish, a Plan has a specifi
 
 Plans are capacity-limited. The **min participants** value is the minimum headcount you need — it's informational and helps friends understand if the plan needs a group to work. The **max participants** value is the hard cap.
 
-As friends join, `participants_count` increments and `available_spots` decrements. Once `participants_count` reaches `max_participants`, the plan is full — the Join button is hidden and the card displays "Full" to anyone who views it.
+As friends join, the available spots count decreases. Once the plan is full, the Join button is hidden and the card displays "Full" to anyone who views it.
 
 ## Plan Expiry
 
@@ -59,5 +59,5 @@ WishWe automatically marks a plan as expired once the event date and time passes
 After your event is done, open the three-dot menu on the plan card and select **Archive**. This marks the plan as completed and moves it to your archived events. Use this to keep your active events list clean and give the plan a clear end state.
 
 <Tip>
-  Set `max_participants` to a realistic number — once full, friends can still view the plan but cannot join. If you want to leave room for spontaneous additions, set the cap slightly higher than your ideal group size.
+  Set your participant cap to a realistic number — once the plan is full, friends can still view it but cannot join. If you want to leave room for spontaneous additions, set the cap slightly higher than your ideal group size.
 </Tip>

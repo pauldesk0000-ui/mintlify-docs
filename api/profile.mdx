@@ -1,7 +1,7 @@
 ---
 title: "WishWe Profile API: Read and Update Your User Profile"
 sidebarTitle: "Profile"
-description: "Retrieve and update your WishWe user profile — username, bio, avatar, city, date of birth, gender, privacy settings, and more."
+description: "Retrieve and update your WishWe user profile — username, bio, avatar, city, date of birth, gender, privacy settings, and social links."
 ---
 
 The Profile API gives you full access to WishWe user profiles. You can read the authenticated user's own profile, apply partial updates (including avatar uploads), search for other users by username, and fetch any user's public profile or their list of events. All endpoints require a valid access token unless noted otherwise.
@@ -38,17 +38,8 @@ The Profile API gives you full access to WishWe user profiles. You can read the 
   A short free-text biography shown on the user's public profile.
 </ResponseField>
 
-<ResponseField name="city" type="object">
-  The user's city, represented as an object with two sub-fields.
-
-  <Expandable title="city fields">
-    <ResponseField name="name" type="string">
-      City name (e.g. `"Amsterdam"`).
-    </ResponseField>
-    <ResponseField name="country" type="string">
-      Country name (e.g. `"Netherlands"`).
-    </ResponseField>
-  </Expandable>
+<ResponseField name="city" type="string">
+  The name of the user's city (e.g. `"Amsterdam"`). Submit a city ID (integer) when updating via `PATCH`.
 </ResponseField>
 
 <ResponseField name="date_of_birth" type="string (date)">
@@ -73,6 +64,10 @@ The Profile API gives you full access to WishWe user profiles. You can read the 
 
 <ResponseField name="is_onboarded" type="boolean">
   `true` after the user has completed the onboarding flow and set their username.
+</ResponseField>
+
+<ResponseField name="has_seen_feed_tour" type="boolean">
+  `true` once the user has dismissed the in-app feed tour overlay.
 </ResponseField>
 
 ---
@@ -109,7 +104,7 @@ Returns the full profile of the currently authenticated user.
 
 ---
 
-## PATCH /api/user/profile/me/
+## PATCH /api/user/profile/update_profile/
 
 Partially updates the authenticated user's profile. Send only the fields you want to change.
 
@@ -138,7 +133,7 @@ Partially updates the authenticated user's profile. Send only the fields you wan
 </ParamField>
 
 <ParamField body="city" type="integer">
-  ID of the city object to associate with this profile.
+  ID of the city to associate with this profile.
 </ParamField>
 
 <ParamField body="date_of_birth" type="string (date)">
@@ -224,7 +219,8 @@ Returns a paginated list of public user profiles. You can filter by username usi
       "city": "Amsterdam",
       "avatar": "https://cdn.wishwe.online/uploads/avatars/a1b2c3.jpg",
       "is_private": false,
-      "is_onboarded": true
+      "is_onboarded": true,
+      "has_seen_feed_tour": false
     },
     {
       "id": 55,
@@ -237,7 +233,8 @@ Returns a paginated list of public user profiles. You can filter by username usi
       "city": "Barcelona",
       "avatar": null,
       "is_private": false,
-      "is_onboarded": true
+      "is_onboarded": true,
+      "has_seen_feed_tour": false
     }
   ]
 }
@@ -280,7 +277,8 @@ Returns the public profile for the user with the given ID.
   "social_media_url": null,
   "avatar": null,
   "is_private": false,
-  "is_onboarded": true
+  "is_onboarded": true,
+  "has_seen_feed_tour": false
 }
 ```
 

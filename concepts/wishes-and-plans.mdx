@@ -10,13 +10,13 @@ Every idea starts somewhere — sometimes it's a firm date on the calendar, and 
 
 ## Wishes
 
-A Wish captures an idea before it has a date. Instead of pinning down a specific day and time, you describe the idea in broad strokes and set a **timeframe text** — a freeform phrase like "sometime this summer" or "before the end of the year." This low-commitment format lets you put the idea out there without anyone feeling pressured to block off their calendar.
+A Wish captures an idea before it has a date. Instead of pinning down a specific day and time, you describe the idea in broad strokes and set a **timeframe** — a freeform phrase like "sometime this summer" or "before the end of the year." This low-commitment format lets you put the idea out there without anyone feeling pressured to block off their calendar.
 
 When your friends see a Wish, they don't join it — they mark themselves as **Interested**. That interest is a signal, not a commitment: it tells you (and everyone else) that enthusiasm exists, and it helps build the momentum needed to turn a vague idea into something real.
 
 Key characteristics of a Wish:
 
-- **No fixed date** — described by a freeform `timeframe_text` instead of a specific date and time
+- **No fixed date** — described by a freeform timeframe instead of a specific date and time
 - **Interest, not commitment** — friends tap Interested rather than joining
 - **Converts to a Plan** — once you have enough interest, you can promote the Wish into a full Plan
 - **Copyable** — you can copy any existing Wish to start a fresh one with the same details
@@ -32,11 +32,11 @@ When your friends see a Plan, they **Join** it. WishWe tracks every join, decrem
 
 Key characteristics of a Plan:
 
-- **Date and time required** — must have a specific `event_date` and `event_time`
-- **Capacity-managed** — requires a `max_participants` value; WishWe tracks `participants_count` and `available_spots`
+- **Date and time required** — must have a specific date and time
+- **Capacity-managed** — requires a maximum number of participants; WishWe tracks the current participant count and remaining available spots
 - **Joining** — friends join the plan (not just express interest)
 - **Auto-expiry** — the plan expires automatically once the event date and time pass
-- **Archivable** — you can mark a plan as `completed` once it's done
+- **Archivable** — you can mark a plan as completed once it's done
 - **Status** — a Plan can be `active`, `closed`, or `completed`
 
 <Note>
@@ -57,10 +57,10 @@ When a Wish starts attracting interest and you're ready to commit to a real date
     Open your Wish and choose **Convert to Plan**. WishWe keeps the title, description, location, cover image, and category from the original Wish.
   </Step>
   <Step title="Fill in the Plan details">
-    Provide the fields a Plan requires: `event_date`, `event_time`, `min_participants`, and `max_participants`. You can also add an optional external link (for tickets, a map, etc.).
+    Provide the fields a Plan requires: a specific date, a time, and a maximum number of participants. You can also add an optional external link (for tickets, a map, etc.).
   </Step>
   <Step title="Confirm">
-    Once you confirm, the event type switches from `wish` to `plan`. People who were interested in the Wish will receive an `event_planned` notification, letting them know it's time to actually join.
+    Once you confirm, the event becomes a full Plan. People who were interested in the Wish will receive an `event_planned` notification, letting them know it's time to actually join.
   </Step>
 </Steps>
 
@@ -70,10 +70,10 @@ When a Wish starts attracting interest and you're ready to commit to a real date
 
 | Feature | Wish | Plan |
 |---|---|---|
-| **Date required** | No — uses freeform `timeframe_text` | Yes — `event_date` and `event_time` required |
-| **Capacity** | No limit tracked | `max_participants` required; spots tracked in real time |
+| **Date required** | No — uses a freeform timeframe | Yes — specific date and time required |
+| **Capacity** | No limit tracked | Maximum participants required; spots tracked in real time |
 | **Friend action** | Mark as **Interested** | **Join** the event |
 | **Status options** | `active`, `closed` | `active`, `closed`, `completed` |
 | **Can be converted** | Yes → into a Plan | N/A |
-| **Can be copied** | Yes → starts a new Wish | — |
+| **Can be copied** | Yes → starts a new Wish | No |
 | **Auto-expires** | No | Yes, after the event date passes |

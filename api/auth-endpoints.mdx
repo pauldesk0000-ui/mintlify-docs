@@ -1,5 +1,5 @@
 ---
-title: "WishWe Auth API Endpoints Reference"
+title: "WishWe Authentication API Endpoints Reference Guide"
 sidebarTitle: "Auth Endpoints"
 description: "Full reference for every WishWe auth endpoint: email start, verify code, set password, login, token refresh, logout, Google OAuth, and password reset."
 ---
@@ -254,7 +254,7 @@ Exchanges a valid refresh token for a new access token. Unlike every other endpo
 
 ### Request headers
 
-<ParamField body="Cookie" type="string" required>
+<ParamField header="Cookie" type="string" required>
   Must contain `refresh_token=<token>`. Example: `Cookie: refresh_token=eyJhbGci...`
 </ParamField>
 
@@ -296,7 +296,7 @@ Signs the user out. Requires a valid access token. The server deletes both `acce
 
 ### Request headers
 
-<ParamField body="Authorization" type="string" required>
+<ParamField header="Authorization" type="string" required>
   `Bearer <access_token>`
 </ParamField>
 
